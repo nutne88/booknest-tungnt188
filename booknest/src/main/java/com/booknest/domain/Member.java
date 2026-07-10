@@ -1,6 +1,12 @@
 package com.booknest.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -19,14 +25,26 @@ public class Member {
     @Column(name = "id")
     private Long id;
 
+    @NotBlank
+    @Size(max = 150)
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
+    @NotBlank
+    @Email
+    @Size(max = 150)
     @Column(name = "email", nullable = false, length = 150)
     private String email;
 
+    @Size(max = 30)
     @Column(name = "phone", length = 30)
     private String phone;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private MemberProfile profile;
+
+    @OneToMany(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private List<Loan> loans = new ArrayList<>();
 
     protected Member() {
     }
@@ -51,6 +69,31 @@ public class Member {
 
     public String getPhone() {
         return phone;
+    }
+
+    public MemberProfile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(MemberProfile profile) {
+        this.profile = profile;
+        if (profile != null) {
+            profile.assignMember(this);
+        }
+    }
+
+    public List<Loan> getLoans() {
+        return loans;
+    }
+
+    public void addLoan(Loan loan) {
+        loans.add(loan);
+        loan.assignMember(this);
+    }
+
+    public void removeLoan(Loan loan) {
+        loans.remove(loan);
+        loan.assignMember(null);
     }
 
     public void setFullName(String fullName) {

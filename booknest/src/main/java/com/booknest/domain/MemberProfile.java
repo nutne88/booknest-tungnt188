@@ -1,6 +1,9 @@
 package com.booknest.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,11 +15,17 @@ public class MemberProfile {
     @Column(name = "id")
     private Long id;
 
+    @Size(max = 500)
     @Column(name = "address", length = 500)
     private String address;
 
+    @NotNull
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false, unique = true)
+    private Member member;
 
     protected MemberProfile() {
     }
@@ -36,6 +45,14 @@ public class MemberProfile {
 
     public LocalDateTime getJoinedAt() {
         return joinedAt;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    void assignMember(Member member) {
+        this.member = member;
     }
 
     public void setAddress(String address) {

@@ -1,8 +1,12 @@
 package com.booknest.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "loans")
@@ -13,9 +17,11 @@ public class Loan {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Column(name = "loan_date", nullable = false)
     private LocalDate loanDate;
 
+    @NotNull
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
@@ -25,6 +31,13 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private LoanStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<LoanItem> items = new ArrayList<>();
 
     protected Loan() {
     }
@@ -53,6 +66,28 @@ public class Loan {
 
     public LoanStatus getStatus() {
         return status;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    void assignMember(Member member) {
+        this.member = member;
+    }
+
+    public List<LoanItem> getItems() {
+        return items;
+    }
+
+    public void addItem(LoanItem item) {
+        items.add(item);
+        item.assignLoan(this);
+    }
+
+    public void removeItem(LoanItem item) {
+        items.remove(item);
+        item.assignLoan(null);
     }
 
     public void markReturned(LocalDateTime returnedAt) {
