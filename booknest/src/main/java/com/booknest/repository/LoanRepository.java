@@ -1,8 +1,11 @@
 package com.booknest.repository;
 
 import com.booknest.domain.Loan;
+import com.booknest.report.LoanStatusCount;
+import com.booknest.report.TopBorrowedBook;
 import jakarta.persistence.EntityManager;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +40,50 @@ public class LoanRepository {
                 .setParameter("id", id)
                 .getResultList();
         return results.stream().findFirst();
+    }
+
+    public List<Loan> findActiveLoansByMemberEmail(String email) {
+        return em.createQuery(
+                        """
+                        select l
+                        from Loan l
+                        join l.member m
+                        where m.email = :email
+                          and l.status <> com.booknest.domain.LoanStatus.RETURNED
+                        order by l.dueDate
+                        """,
+                        Loan.class)
+                .setParameter("email", email)
+                .getResultList();
+    }
+
+    public List<Loan> findOverdueLoans(LocalDate asOf) {
+        return em.createNamedQuery("Loan.findOverdue", Loan.class)
+                .setParameter("asOf", asOf)
+                .getResultList();
+    }
+
+    public List<LoanStatusCount> countByStatus() {
+        return em.createQuery(
+                        """
+                        select new com.booknest.report.LoanStatusCount(l.status, count(l))
+                        from Loan l
+                        group by l.status
+                        """,
+                        LoanStatusCount.class)
+                .getResultList();
+    }
+
+    public List<TopBorrowedBook> topBorrowedBooks(int limit) {
+        return em.createQuery(
+                        """
+                        select new com.booknest.report.TopBorrowedBook(i.book.title, sum(i.quantity))
+                        from LoanItem i
+                        group by i.book.title
+                        order by sum(i.quantity) desc
+                        """,
+                        TopBorrowedBook.class)
+                .setMaxResults(limit)
+                .getResultList();
     }
 }

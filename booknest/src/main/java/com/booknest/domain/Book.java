@@ -9,6 +9,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@NamedQuery(
+        name = "Book.findByCategoryName",
+        query = "select b from Book b where b.category.name = :categoryName order by b.title"
+)
+@NamedQuery(
+        name = "Book.findByAuthorName",
+        query = "select distinct b from Book b join b.authors a where a.fullName = :authorName order by b.title"
+)
 @Table(
         name = "books",
         uniqueConstraints = {
@@ -50,7 +58,6 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "category_id")
     private Category category;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "book_authors",

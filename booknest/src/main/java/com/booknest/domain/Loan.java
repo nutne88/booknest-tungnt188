@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@NamedQuery(
+        name = "Loan.findOverdue",
+        query = "select l from Loan l where l.status = com.booknest.domain.LoanStatus.ACTIVE "
+                + "and l.dueDate < :asOf order by l.dueDate"
+)
 @Table(name = "loans")
 public class Loan {
 

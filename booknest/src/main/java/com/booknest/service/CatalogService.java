@@ -80,8 +80,30 @@ public class CatalogService {
         return Tx.run(em -> new BookRepository(em).findAll());
     }
 
+    public List<Book> listBooksPaged(int pageIndex, int pageSize) {
+        return Tx.run(em -> new BookRepository(em).findAllPaged(pageIndex, pageSize));
+    }
+
     public List<Book> searchBooksByTitle(String keyword) {
         return Tx.run(em -> new BookRepository(em).searchByTitleKeyword(keyword));
+    }
+
+    public List<Book> searchBooksByTitlePaged(String keyword, int pageIndex, int pageSize) {
+        return Tx.run(em -> new BookRepository(em).searchByTitleKeywordPaged(keyword, pageIndex, pageSize));
+    }
+
+    public List<Book> listBooksByCategory(Long categoryId) {
+        return Tx.run(em -> new BookRepository(em).findByCategory(categoryId));
+    }
+
+    public List<Book> listBooksByAuthor(Long authorId) {
+        return Tx.run(em -> new BookRepository(em).findByAuthor(authorId));
+    }
+
+    public List<Book> searchBooksDynamic(String keyword, Long categoryId, Long authorId,
+                                         Boolean onlyAvailable, int pageIndex, int pageSize) {
+        return Tx.run(em -> new BookRepository(em)
+                .searchDynamic(keyword, categoryId, authorId, onlyAvailable, pageIndex, pageSize));
     }
 
     private static <T> void validateOrThrow(T entity) {
