@@ -52,14 +52,6 @@ public class BookRepository {
                 .getResultList();
     }
 
-    public List<Book> searchByTitleKeyword(String keyword) {
-        return em.createQuery(
-                        "select b from Book b where lower(b.title) like lower(:kw) order by b.title",
-                        Book.class)
-                .setParameter("kw", "%" + keyword + "%")
-                .getResultList();
-    }
-
     public List<Book> searchByTitleKeywordPaged(String keyword, int pageIndex, int pageSize) {
         return em.createQuery(
                         "select b from Book b where lower(b.title) like lower(:kw) order by b.title",

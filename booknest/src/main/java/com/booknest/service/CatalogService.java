@@ -26,6 +26,10 @@ public class CatalogService {
         return Tx.run(em -> new CategoryRepository(em).findAll());
     }
 
+    public List<Category> searchCategories(String keyword) {
+        return Tx.run(em -> new CategoryRepository(em).searchByNameKeyword(keyword));
+    }
+
     public Author createAuthor(String fullName, String bio) {
         return Tx.run(em -> {
             Author author = new Author(fullName, bio);
@@ -82,10 +86,6 @@ public class CatalogService {
 
     public List<Book> listBooksPaged(int pageIndex, int pageSize) {
         return Tx.run(em -> new BookRepository(em).findAllPaged(pageIndex, pageSize));
-    }
-
-    public List<Book> searchBooksByTitle(String keyword) {
-        return Tx.run(em -> new BookRepository(em).searchByTitleKeyword(keyword));
     }
 
     public List<Book> searchBooksByTitlePaged(String keyword, int pageIndex, int pageSize) {

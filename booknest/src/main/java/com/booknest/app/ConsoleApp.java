@@ -2,6 +2,7 @@ package com.booknest.app;
 
 import com.booknest.domain.Author;
 import com.booknest.domain.Book;
+import com.booknest.domain.Category;
 import com.booknest.domain.Loan;
 import com.booknest.domain.Member;
 import com.booknest.domain.MemberProfile;
@@ -65,6 +66,7 @@ public class ConsoleApp {
                     case "23" -> firstLevelCacheDemo();
                     case "24" -> SeedData.run();
                     case "25" -> viewMemberDetail();
+                    case "26" -> searchCategories();
                     case "0" -> running = false;
                     default -> System.out.println("Unknown option.");
                 }
@@ -92,7 +94,7 @@ public class ConsoleApp {
                  4) List authors               14) List books by category
                  5) Create book                15) List books by author
                  6) List books (paged)         16) Advanced book search (keyword/category/author/availability)
-                 7) Search books by title      17) Active loans by member email
+                 7) Search books by title (paged) 17) Active loans by member email
                  8) Register member            18) Overdue loans
                  9) List members               19) Count loans by status
                 10) Search members by name     20) Top borrowed books
@@ -101,6 +103,7 @@ public class ConsoleApp {
                                                 23) [Perf] First-level cache demo
                                                 24) Seed sample data
                                                 25) View member detail (with profile)
+                                                26) Search categories by name
                                                  0) Exit
                 Choose:""");
     }
@@ -115,6 +118,15 @@ public class ConsoleApp {
 
     private void listCategories() {
         catalogService.listCategories().forEach(System.out::println);
+    }
+
+    private void searchCategories() {
+        System.out.print("Keyword: ");
+        List<Category> results = catalogService.searchCategories(scanner.nextLine().trim());
+        if (results.isEmpty()) {
+            System.out.println("No categories matched.");
+        }
+        results.forEach(System.out::println);
     }
 
     // --- Author ---
@@ -164,7 +176,10 @@ public class ConsoleApp {
 
     private void searchBooks() {
         System.out.print("Keyword: ");
-        catalogService.searchBooksByTitle(scanner.nextLine().trim()).forEach(System.out::println);
+        String keyword = scanner.nextLine().trim();
+        System.out.print("Page number (starting at 0): ");
+        int page = Integer.parseInt(scanner.nextLine().trim());
+        catalogService.searchBooksByTitlePaged(keyword, page, PAGE_SIZE).forEach(System.out::println);
     }
 
     private void listBooksByCategory() {

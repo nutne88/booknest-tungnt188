@@ -27,4 +27,12 @@ public class CategoryRepository {
         return em.createQuery("select c from Category c order by c.name", Category.class)
                 .getResultList();
     }
+
+    public List<Category> searchByNameKeyword(String keyword) {
+        return em.createQuery(
+                        "select c from Category c where lower(c.name) like lower(:kw) order by c.name",
+                        Category.class)
+                .setParameter("kw", "%" + keyword + "%")
+                .getResultList();
+    }
 }
