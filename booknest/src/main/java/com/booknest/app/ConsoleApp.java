@@ -4,6 +4,7 @@ import com.booknest.domain.Author;
 import com.booknest.domain.Book;
 import com.booknest.domain.Loan;
 import com.booknest.domain.Member;
+import com.booknest.domain.MemberProfile;
 import com.booknest.exception.BookNotFoundException;
 import com.booknest.exception.DataAccessException;
 import com.booknest.exception.InsufficientCopiesException;
@@ -21,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
 
 public class ConsoleApp {
 
@@ -60,6 +60,11 @@ public class ConsoleApp {
                     case "18" -> overdueLoans();
                     case "19" -> countLoansByStatus();
                     case "20" -> topBorrowedBooks();
+                    case "21" -> PerformanceDemo.runNPlusOneDemo();
+                    case "22" -> PerformanceDemo.runOptimizedFetchDemo();
+                    case "23" -> firstLevelCacheDemo();
+                    case "24" -> SeedData.run();
+                    case "25" -> viewMemberDetail();
                     case "0" -> running = false;
                     default -> System.out.println("Unknown option.");
                 }
@@ -91,6 +96,11 @@ public class ConsoleApp {
                  8) Register member            18) Overdue loans
                  9) List members               19) Count loans by status
                 10) Search members by name     20) Top borrowed books
+                                                21) [Perf] N+1 demo (naive)
+                                                22) [Perf] Fetch join demo (optimized)
+                                                23) [Perf] First-level cache demo
+                                                24) Seed sample data
+                                                25) View member detail (with profile)
                                                  0) Exit
                 Choose:""");
     }
@@ -194,8 +204,12 @@ public class ConsoleApp {
         String email = scanner.nextLine().trim();
         System.out.print("Phone: ");
         String phone = scanner.nextLine().trim();
-        Member member = memberService.register(name, email, phone);
-        System.out.println("Registered: " + member);
+        System.out.print("Address (optional): ");
+        String address = scanner.nextLine().trim();
+
+        Member member = memberService.register(name, email, phone, address.isBlank() ? null : address);
+        System.out.println("Registered: " + member
+                + " (profile created, joinedAt=" + member.getProfile().getJoinedAt() + ")");
     }
 
     private void listMembers() {
@@ -205,6 +219,21 @@ public class ConsoleApp {
     private void searchMembers() {
         System.out.print("Keyword: ");
         memberService.searchByName(scanner.nextLine().trim()).forEach(System.out::println);
+    }
+
+    private void viewMemberDetail() {
+        System.out.print("Member id: ");
+        Long memberId = Long.valueOf(scanner.nextLine().trim());
+        Member member = memberService.viewMemberDetail(memberId);
+        System.out.println(member);
+
+        MemberProfile profile = member.getProfile();
+        if (profile != null) {
+            System.out.println("  Profile: address=" + profile.getAddress()
+                    + ", joinedAt=" + profile.getJoinedAt());
+        } else {
+            System.out.println("  Profile: none");
+        }
     }
 
     // --- Lending ---
@@ -275,6 +304,12 @@ public class ConsoleApp {
         int limit = Integer.parseInt(scanner.nextLine().trim());
         reportService.topBorrowedBooks(limit)
                 .forEach(row -> System.out.println(row.title() + " -> " + row.totalQuantityBorrowed()));
+    }
+
+    private void firstLevelCacheDemo() {
+        System.out.print("Book id to look up twice: ");
+        Long bookId = Long.valueOf(scanner.nextLine().trim());
+        PerformanceDemo.runFirstLevelCacheDemo(bookId);
     }
 
     private Integer parseIntOrNull(String s) {

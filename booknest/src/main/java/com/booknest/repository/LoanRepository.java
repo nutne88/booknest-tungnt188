@@ -17,6 +17,25 @@ public class LoanRepository {
         this.em = em;
     }
 
+    public List<Loan> findAllNaive() {
+        return em.createQuery("select l from Loan l order by l.id", Loan.class)
+                .getResultList();
+    }
+
+    public List<Loan> findAllWithDetails() {
+        return em.createQuery(
+                        """
+                        select distinct l
+                        from Loan l
+                        join fetch l.member
+                        left join fetch l.items i
+                        left join fetch i.book
+                        order by l.id
+                        """,
+                        Loan.class)
+                .getResultList();
+    }
+
     public Loan save(Loan loan) {
         em.persist(loan); // cascades LoanItems (CascadeType.ALL on Loan.items)
         return loan;

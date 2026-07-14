@@ -44,4 +44,13 @@ public class MemberRepository {
                 .setParameter("kw", "%" + keyword + "%")
                 .getResultList();
     }
+
+    public Optional<Member> findWithProfileById(Long id) {
+        List<Member> results = em.createQuery(
+                        "select m from Member m left join fetch m.profile where m.id = :id",
+                        Member.class)
+                .setParameter("id", id)
+                .getResultList();
+        return results.stream().findFirst();
+    }
 }

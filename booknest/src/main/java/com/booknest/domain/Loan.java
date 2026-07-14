@@ -41,6 +41,7 @@ public class Loan {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @org.hibernate.annotations.BatchSize(size = 20)
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanItem> items = new ArrayList<>();
 
